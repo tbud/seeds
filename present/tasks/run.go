@@ -140,14 +140,6 @@ func environ(vars ...string) []string {
 	return env
 }
 
-const basePathMessage = `
-By default, gopresent locates the slide template files and associated
-static content by looking for a %q package
-in your Go workspaces (GOPATH).
-
-You may use the -base flag to specify an alternate location.
-`
-
 const localhostWarning = `
 WARNING!  WARNING!  WARNING!
 

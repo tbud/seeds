@@ -3,11 +3,12 @@ package tasks
 import (
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
+
+	. "github.com/tbud/bud/context"
 
 	"golang.org/x/tools/present"
 )
@@ -27,13 +28,13 @@ func dirHandler(w http.ResponseWriter, r *http.Request) {
 	if isDoc(name) {
 		err := renderDoc(w, name)
 		if err != nil {
-			log.Println(err)
+			Log.Warn("%v", err)
 			http.Error(w, err.Error(), 500)
 		}
 		return
 	}
 	if isDir, err := dirList(w, name); err != nil {
-		log.Println(err)
+		Log.Warn("%v", err)
 		http.Error(w, err.Error(), 500)
 		return
 	} else if isDir {
@@ -149,7 +150,7 @@ func dirList(w io.Writer, name string) (isDir bool, err error) {
 		}
 		if isDoc(e.Name) {
 			if p, err := parse(e.Path, present.TitlesOnly); err != nil {
-				log.Println(err)
+				Log.Warn("%v", err)
 			} else {
 				e.Title = p.Title
 			}
