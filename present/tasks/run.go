@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 
@@ -83,6 +84,8 @@ func (r *RunPresentTask) Execute() error {
 		Log.Error(localhostWarning)
 	}
 
+	startBrowser("http://" + r.HttpAddr)
+
 	Log.Info("Open your web browser and visit %s", origin.String())
 	return http.Serve(ln, nil)
 }
@@ -118,6 +121,21 @@ func environ(vars ...string) []string {
 		}
 	}
 	return env
+}
+
+func startBrowser(url string) bool {
+	// try to start the browser
+	var args []string
+	switch runtime.GOOS {
+	case "darwin":
+		args = []string{"open"}
+	case "windows":
+		args = []string{"cmd", "/c", "start"}
+	default:
+		args = []string{"xdg-open"}
+	}
+	cmd := exec.Command(args[0], append(args[1:], url)...)
+	return cmd.Start() == nil
 }
 
 const localhostWarning = `
