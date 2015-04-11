@@ -2,12 +2,10 @@ package tasks
 
 import (
 	. "github.com/tbud/bud/context"
-	"go/build"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -16,22 +14,16 @@ import (
 )
 
 type RunPresentTask struct {
+	commonCfg
 	HttpAddr     string // HTTP service address (e.g., '127.0.0.1:3999')
 	OriginHost   string // host component of web origin URL (e.g., 'localhost')
-	BaseDir      string // base path for slide theme template and static resources
-	Theme        string // theme name with base dir or theme absolutely path
-	PlayEnabled  bool   // enable playground (permit execution of arbitrary user code)
 	NativeClient bool   // use Native Client environment playground (prevents non-Go code execution)
-
-	rootDir string // template root path
 }
 
 func init() {
 	runTask := &RunPresentTask{
 		HttpAddr:     "127.0.0.1:3999",
 		OriginHost:   "",
-		Theme:        "default",
-		PlayEnabled:  true,
 		NativeClient: false,
 	}
 
@@ -81,10 +73,10 @@ func (r *RunPresentTask) Execute() error {
 				return environ("GOOS=nacl")
 			}
 		}
-		playScript(r.rootDir, "SocketTransport")
+		playScript(r.RootTemplateDir, "SocketTransport")
 		http.Handle("/socket", socket.NewHandler(origin))
 	}
-	http.Handle("/static/", http.FileServer(http.Dir(r.rootDir)))
+	http.Handle("/static/", http.FileServer(http.Dir(r.RootTemplateDir)))
 
 	if !ln.Addr().(*net.TCPAddr).IP.IsLoopback() &&
 		r.PlayEnabled && !r.NativeClient {
@@ -95,26 +87,14 @@ func (r *RunPresentTask) Execute() error {
 	return http.Serve(ln, nil)
 }
 
-func (r *RunPresentTask) Validate() error {
-	if len(r.BaseDir) == 0 {
-		p, err := build.Import(PRESENT_BASE_PKG, "", build.FindOnly)
-		if err != nil {
-			Log.Error("Couldn't find go present files: %v\n", err)
-			return err
-		}
-		r.BaseDir = p.Dir
+func (r *RunPresentTask) Validate() (err error) {
+	if err = r.commonCfg.Validate(); err != nil {
+		return err
 	}
 
 	present.PlayEnabled = r.PlayEnabled
 
-	if filepath.IsAbs(r.Theme) {
-		r.rootDir = r.Theme
-	} else {
-		r.rootDir = filepath.Join(r.BaseDir, "themes", r.Theme)
-	}
-
-	err := initTemplates(r.rootDir)
-	if err != nil {
+	if err = initTemplates(r.RootTemplateDir); err != nil {
 		Log.Fatal("Failed to parse templates: %v", err)
 		return err
 	}
