@@ -1,12 +1,12 @@
 package tasks
 
 import (
-	. "github.com/tbud/bud/context"
-	"github.com/tbud/x/io/ioutil"
-	"github.com/tbud/x/path/selector"
 	"os"
 	"path/filepath"
 
+	. "github.com/tbud/bud/context"
+	"github.com/tbud/x/io/ioutil"
+	"github.com/tbud/x/path/selector"
 	"golang.org/x/tools/present"
 )
 

@@ -1,10 +1,11 @@
 package tasks
 
 import (
-	. "github.com/tbud/bud/context"
-	. "github.com/tbud/x/config"
 	"go/build"
 	"path/filepath"
+
+	. "github.com/tbud/bud/context"
+	. "github.com/tbud/x/config"
 )
 
 const (

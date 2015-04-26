@@ -1,7 +1,6 @@
 package tasks
 
 import (
-	. "github.com/tbud/bud/context"
 	"net"
 	"net/http"
 	"net/url"
@@ -10,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	. "github.com/tbud/bud/context"
 	"golang.org/x/tools/playground/socket"
 	"golang.org/x/tools/present"
 )
